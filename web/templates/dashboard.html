@@ -62,11 +62,24 @@ async function loadHistory() {
         <span class="history-sub">${c.input_text} &middot; ${new Date(c.created_at).toLocaleDateString()}</span>
       </div>
       <div class="history-actions">
+        <button class="btn btn-outline btn-sm" onclick="viewQR('${c.id}')">View</button>
         <a href="/api/v1/qr/${c.id}/download" class="btn btn-outline btn-sm">Download</a>
         <button class="btn btn-danger btn-sm" onclick="deleteQR('${c.id}')">Delete</button>
       </div>
     </div>
   `).join('');
+}
+
+async function viewQR(id) {
+  const res = await fetch('/api/v1/qr/' + id, { headers: authHeaders() });
+  if (res.status === 401) { window.location.href = '/login'; return; }
+  const data = await res.json();
+  document.getElementById('qr-image').src = 'data:image/png;base64,' + data.image_base64;
+  document.getElementById('qr-input-display').textContent = data.input_text;
+  document.getElementById('qr-title-display').textContent = data.title || '—';
+  document.getElementById('download-link').href = '/api/v1/qr/' + id + '/download';
+  document.getElementById('qr-result').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function deleteQR(id) {
