@@ -1,6 +1,7 @@
 package qr_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/adeelkhan/qr-service/internal/database"
@@ -84,8 +85,8 @@ func TestGet_WrongUser(t *testing.T) {
 	db.Create(&other)
 	created, _ := svc.Generate(owner.ID, "secret", "")
 	_, err := svc.Get(other.ID, created.ID)
-	if err == nil {
-		t.Fatal("expected error when wrong user fetches QR code")
+	if !errors.Is(err, qr.ErrForbidden) {
+		t.Fatalf("expected ErrForbidden, got %v", err)
 	}
 }
 
@@ -93,8 +94,8 @@ func TestGet_NotFound(t *testing.T) {
 	svc, db := setup(t)
 	user := seedUser(t, db)
 	_, err := svc.Get(user.ID, uuid.New())
-	if err == nil {
-		t.Fatal("expected error for non-existent QR code")
+	if !errors.Is(err, qr.ErrNotFound) {
+		t.Fatalf("expected ErrNotFound, got %v", err)
 	}
 }
 
@@ -118,7 +119,7 @@ func TestDelete_WrongUser(t *testing.T) {
 	db.Create(&other)
 	created, _ := svc.Generate(owner.ID, "mine", "")
 	err := svc.Delete(other.ID, created.ID)
-	if err == nil {
-		t.Fatal("expected error when wrong user deletes QR code")
+	if !errors.Is(err, qr.ErrForbidden) {
+		t.Fatalf("expected ErrForbidden, got %v", err)
 	}
 }
