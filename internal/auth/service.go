@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/adeelkhan/qr-service/internal/models"
@@ -36,7 +37,10 @@ func (s *Service) Register(username, email, password string) (*models.User, erro
 		PasswordHash: string(hash),
 	}
 	if err := s.db.Create(user).Error; err != nil {
-		return nil, ErrUserExists
+		if strings.Contains(err.Error(), "UNIQUE") || strings.Contains(err.Error(), "duplicate") {
+			return nil, ErrUserExists
+		}
+		return nil, err
 	}
 	return user, nil
 }
