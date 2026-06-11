@@ -1,5 +1,7 @@
 # QRGen — QR Code Generation Service
 
+![App Snapshot](snapshot.png)
+
 A self-contained microservice for generating QR codes. Users register, log in, and generate QR codes from any text or URL. Generated codes are stored per user with a full history, each downloadable as a PNG.
 
 ## Features
