@@ -1,37 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QRGen</title>
-  <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-  <nav class="navbar">
-    <a class="brand" href="/">&#9698; QRGen</a>
-    <div class="nav-actions" id="nav-actions">
-      <a href="/login" class="btn btn-outline">Login</a>
-      <a href="/register" class="btn btn-primary">Register</a>
-    </div>
-  </nav>
-  {{block "content" .}}{{end}}
-  <script>
-    const token = localStorage.getItem('token');
-    const username = localStorage.getItem('username');
-    if (token && username) {
-      document.getElementById('nav-actions').innerHTML =
-        '<span class="nav-user">Hey, <strong>' + username + '</strong></span>' +
-        '<button class="btn btn-danger" onclick="logout()">Logout</button>';
-    }
-    function logout() {
-      fetch('/api/v1/auth/logout', { method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-      }).finally(() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        window.location.href = '/login';
-      });
-    }
-  </script>
-</body>
-</html>
+{{define "nav"}}
+<nav class="navbar">
+  <a class="brand" href="/">&#9698; QRGen</a>
+  <div class="nav-actions" id="nav-actions">
+    <a href="/login" class="btn btn-outline">Login</a>
+    <a href="/register" class="btn btn-primary">Register</a>
+  </div>
+</nav>
+<script>
+  if (localStorage.getItem('token') && localStorage.getItem('username')) {
+    document.getElementById('nav-actions').innerHTML =
+      '<span class="nav-user">Hey, <strong>' + localStorage.getItem('username') + '</strong></span>' +
+      '<button class="btn btn-danger" onclick="logout()">Logout</button>';
+  }
+  function logout() {
+    fetch('/api/v1/auth/logout', { method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    }).finally(() => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      window.location.href = '/login';
+    });
+  }
+</script>
+{{end}}

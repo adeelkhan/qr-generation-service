@@ -28,7 +28,7 @@ func Load() *Config {
 		DBPassword: getEnv("DB_PASSWORD", "postgres"),
 		DBName:     getEnv("DB_NAME", "qrgen"),
 		JWTSecret:  getEnv("JWT_SECRET", "change-me-in-production"),
-		ServerPort: getEnv("SERVER_PORT", "8080"),
+		ServerPort: getEnv("SERVER_PORT", "9191"),
 	}
 }
 
