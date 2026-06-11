@@ -3,7 +3,6 @@ package config
 import (
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -42,7 +41,6 @@ func getEnv(key, fallback string) string {
 
 // DSN returns the PostgreSQL connection string.
 func (c *Config) DSN() string {
-	_ = strconv.Itoa // imported for future use
 	return "host=" + c.DBHost +
 		" user=" + c.DBUser +
 		" password=" + c.DBPassword +
