@@ -1,0 +1,80 @@
+{{template "layout.html" .}}
+{{define "content"}}
+<div class="dashboard">
+  <div class="generate-panel">
+    <h3>Generate QR Code</h3>
+    <div class="generate-form">
+      <input type="text" id="input-text" placeholder="Enter text or URL to encode...">
+      <input type="text" id="title" placeholder="Title (optional)">
+      <button class="btn btn-primary" onclick="generateQR()">Generate</button>
+    </div>
+    <div id="qr-result" class="qr-result hidden">
+      <img id="qr-image" src="" alt="QR Code">
+      <div class="qr-meta">
+        <p><span class="label">Input</span><span id="qr-input-display"></span></p>
+        <p><span class="label">Title</span><span id="qr-title-display"></span></p>
+        <a id="download-link" href="#" class="btn btn-outline btn-sm">Download PNG</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="history-panel">
+    <h3>My QR Codes</h3>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<script>
+const token = () => localStorage.getItem('token');
+
+function authHeaders() {
+  return { 'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json' };
+}
+
+async function generateQR() {
+  const inputText = document.getElementById('input-text').value;
+  const title = document.getElementById('title').value;
+  const res = await fetch('/api/v1/qr/generate', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ input_text: inputText, title })
+  });
+  if (res.status === 401) { window.location.href = '/login'; return; }
+  const data = await res.json();
+  document.getElementById('qr-image').src = 'data:image/png;base64,' + data.image_base64;
+  document.getElementById('qr-input-display').textContent = inputText;
+  document.getElementById('qr-title-display').textContent = title || '—';
+  document.getElementById('download-link').href = data.download_url;
+  document.getElementById('qr-result').classList.remove('hidden');
+  loadHistory();
+}
+
+async function loadHistory() {
+  const res = await fetch('/api/v1/qr', { headers: authHeaders() });
+  if (res.status === 401) { window.location.href = '/login'; return; }
+  const codes = await res.json();
+  const list = document.getElementById('history-list');
+  if (!codes.length) { list.innerHTML = '<p class="empty">No QR codes yet.</p>'; return; }
+  list.innerHTML = codes.map(c => `
+    <div class="history-item">
+      <div class="history-meta">
+        <strong>${c.title || c.input_text}</strong>
+        <span class="history-sub">${c.input_text} &middot; ${new Date(c.created_at).toLocaleDateString()}</span>
+      </div>
+      <div class="history-actions">
+        <a href="/api/v1/qr/${c.id}/download" class="btn btn-outline btn-sm">Download</a>
+        <button class="btn btn-danger btn-sm" onclick="deleteQR('${c.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function deleteQR(id) {
+  const res = await fetch('/api/v1/qr/' + id, { method: 'DELETE', headers: authHeaders() });
+  if (res.ok) loadHistory();
+}
+
+if (!token()) { window.location.href = '/login'; }
+else { loadHistory(); }
+</script>
+{{end}}

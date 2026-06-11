@@ -1,0 +1,40 @@
+{{template "layout.html" .}}
+{{define "content"}}
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>Welcome back</h2>
+    <p class="subtitle">Sign in to your account</p>
+    <div id="error-msg" class="error-msg hidden"></div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="your_username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">Sign In</button>
+    <p class="auth-link">No account? <a href="/register">Register here</a></p>
+  </div>
+</div>
+<script>
+async function doLogin() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const res = await fetch('/api/v1/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    document.getElementById('error-msg').textContent = data.error || 'Login failed';
+    document.getElementById('error-msg').classList.remove('hidden');
+    return;
+  }
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('username', username);
+  window.location.href = '/dashboard';
+}
+</script>
+{{end}}
