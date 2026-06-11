@@ -50,8 +50,12 @@ func TestList_ReturnsOnlyOwnerCodes(t *testing.T) {
 	u2 := models.User{Username: "other", Email: "o@o.com", PasswordHash: "x"}
 	db.Create(&u2)
 
-	svc.Generate(u1.ID, "for u1", "")
-	svc.Generate(u2.ID, "for u2", "")
+	if _, err := svc.Generate(u1.ID, "for u1", ""); err != nil {
+		t.Fatalf("seed qr u1: %v", err)
+	}
+	if _, err := svc.Generate(u2.ID, "for u2", ""); err != nil {
+		t.Fatalf("seed qr u2: %v", err)
+	}
 
 	codes, err := svc.List(u1.ID)
 	if err != nil {
